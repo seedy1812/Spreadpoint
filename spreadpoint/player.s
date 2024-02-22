@@ -14,7 +14,7 @@ MY_BREAK	macro
 	OPT ZXNEXTREG    
 
     seg     CODE_SEG, 4:$0000,$8000
-    seg     STNICC_SEG, $30:$0000,$0000 
+    seg     TCB_1_SEG, 18:$0000,$0000 
     
 
     seg     CODE_SEG
@@ -38,8 +38,10 @@ start:
 	ld (load_page),a
 
 
-	call video_setup
+	call logo_setup
 
+	call ball_load_sprite
+	call video_setup
 	call init_vbl
 
 
@@ -80,20 +82,33 @@ start:
 	nextreg $6b, %10100001
 	nextreg $6c, %00000000
 
+
 frame_loop:
 	call wait_vbl
 	call StartCopper
+	call logo_update
+	ld a, 1
+	out ($fe),a
+
+	call draw_balls
+	ld a, 2
+	out ($fe),a
+
+	call calc_balls
+
 	ld a, 0
 	out ($fe),a
 	jp frame_loop
 
-
-    
 mem_init_page:  db 16
-
 
 include "loading.s"
 include "video.s"
+include "bobs.s"
+include "logo.s"
+
+
+    seg     CODE_SEG
 
 
  	savenex "player.nex",start

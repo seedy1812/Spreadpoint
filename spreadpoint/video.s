@@ -4,11 +4,26 @@ TILE_X_LO            equ $30
 TILE_X_HI            equ $2f
 TILE_Y               equ $31
 
+    
+TCB_PAL0      equ $d4
+TCB_PAL1      equ $d0
+TCB_PAL2      equ $d0
+TCB_PAL3      equ $c8
+TCB_PAL4      equ $c4
+TCB_PAL5      equ $c0
+TCB_PAL6      equ $a0
+TCB_PAL7      equ $81
+TCB_PAL8      equ $81
+TCB_PAL9      equ $62
+TCB_PALA      equ $44
+TCB_PALB      equ $22
+TCB_PALC      equ $03
+
 video_setup:
 
        nextreg $43,%01100000   ; select tilemap 1st palette
        nextreg $40,1           ; palette index
-       nextreg $4c,0           ; 0 is transparent
+       nextreg $4c,$0           ; 0 is transparent
 
        nextreg $68,%00000000   ;ula disable
        nextreg $6b,%10100011    ; Tilemap Control 512 tiles + above ula
@@ -18,17 +33,17 @@ video_setup:
 
       nextreg $1c,%00001000 ; Clip Window control : reset tilemap index
 
-       nextreg $1b,+((0+8)/2) ; Clip Window Tilemap : x1 /2     
-       nextreg $1b,+((320-8)/2-1)              ; x2 /2
+       nextreg $1b,0; Clip Window Tilemap : x1 /2     
+       nextreg $1b,159              ; x2 /2
        nextreg $1b,(32)                          ; y1
-       nextreg $1b,(192+32+32-32-1)               ; y2
+       nextreg $1b,(192+64-32-1)               ; y2
 
        nextreg TILE_X_HI,0           ; Tilemap Offset X MSB ; windows x = 0
        nextreg TILE_X_LO,0           ; Tilemap Offset X LSB
 
        nextreg TILE_Y,0           ; Tilemap Offset Y ;windows y = 0
 
-       nextreg $15,%00000001 ; no low rez , LSU , no sprites , no over border
+       nextreg $15,%00000111 ; no low rez , LSU , no sprites , no over border
 
        ret
 
@@ -88,7 +103,7 @@ GetMaxScanline:
        ret
 
 StartCopper:
-       call testme
+       call scroller
        
        ld a,0
        out($fe),a
@@ -168,6 +183,15 @@ OFF_Y equ -32
 
 PART2 equ -96
 
+PAL_RADASTAN  macro
+             COPPER_MOVE($43,%10010001)
+              endm
+
+PAL_LAYER3  macro
+             COPPER_MOVE($43,%10110001)
+              endm
+
+
 copper_new_start:
 
 COPPER_WAIT(0,1) 
@@ -177,11 +201,20 @@ COPPER_MOVE(MAP_DX,0)
 COPPER_MOVE(MAP_DY,OFF_Y+0) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL0)
 
+_MAGIC
+PAL_RADASTAN
+COPPER_MOVE(PAL_VALUE_8BIT,TCB_PAL0)
+PAL_LAYER3
+
 COPPER_WAIT(6,0) 
 _DX_1:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+(8-6)*1) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL1)
+
+PAL_RADASTAN
+COPPER_MOVE(PAL_VALUE_8BIT,TCB_PAL1)
+PAL_LAYER3
 
 COPPER_WAIT(12,0) 
 _DX_2:
@@ -189,11 +222,19 @@ COPPER_MOVE(MAP_DX,0)
 COPPER_MOVE(MAP_DY,OFF_Y+(8-6)*2) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL2)
 
+PAL_RADASTAN
+COPPER_MOVE(PAL_VALUE_8BIT,TCB_PAL2)
+PAL_LAYER3
+
 COPPER_WAIT(18,0) 
 _DX_3:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+(8-6)*3) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL3)
+
+PAL_RADASTAN
+COPPER_MOVE(PAL_VALUE_8BIT,TCB_PAL3)
+PAL_LAYER3
 
 COPPER_WAIT(24,0) 
 _DX_4:
@@ -207,11 +248,19 @@ COPPER_MOVE(MAP_DX,0)
 COPPER_MOVE(MAP_DY,OFF_Y+(8-6)*5) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL5)
 
+PAL_RADASTAN
+COPPER_MOVE(PAL_VALUE_8BIT,TCB_PAL4)
+PAL_LAYER3
+
 COPPER_WAIT(36,0) 
 _DX_6:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+(8-6)*6) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL6)
+
+PAL_RADASTAN
+COPPER_MOVE(PAL_VALUE_8BIT,TCB_PAL5)
+PAL_LAYER3
 
 COPPER_WAIT(42,0) 
 _DX_7:
@@ -219,11 +268,19 @@ COPPER_MOVE(MAP_DX,0)
 COPPER_MOVE(MAP_DY,OFF_Y+(8-6)*7) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL7)
 
+PAL_RADASTAN
+COPPER_MOVE(PAL_VALUE_8BIT,TCB_PAL6)
+PAL_LAYER3
+
 COPPER_WAIT(48,0) 
 _DX_8:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+(8-6)*8) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL8)
+
+PAL_RADASTAN
+COPPER_MOVE(PAL_VALUE_8BIT,TCB_PAL7)
+PAL_LAYER3
 
 COPPER_WAIT(54,0) 
 _DX_7a:
@@ -231,11 +288,19 @@ COPPER_MOVE(MAP_DX,0)
 COPPER_MOVE(MAP_DY,OFF_Y+2-(14*0)) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL7)
 
+PAL_RADASTAN
+COPPER_MOVE(PAL_VALUE_8BIT,TCB_PAL8)
+PAL_LAYER3
+
 COPPER_WAIT(60,0) 
 _DX_6a:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+2-(14*1)) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL6)
+
+PAL_RADASTAN
+COPPER_MOVE(PAL_VALUE_8BIT,TCB_PAL9)
+PAL_LAYER3
 
 COPPER_WAIT(66,0) 
 _DX_5a:
@@ -243,17 +308,30 @@ COPPER_MOVE(MAP_DX,0)
 COPPER_MOVE(MAP_DY,OFF_Y+2-(14*2)) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL5)
 
+PAL_RADASTAN
+COPPER_MOVE(PAL_VALUE_8BIT,TCB_PALA)
+PAL_LAYER3
+
+
 COPPER_WAIT(72,0) 
 _DX_4a:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+2-(14*3)) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL4)
 
+PAL_RADASTAN
+COPPER_MOVE(PAL_VALUE_8BIT,TCB_PALB)
+PAL_LAYER3
+
 COPPER_WAIT(78,0) 
 _DX_3a:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+2-(14*4)) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL3)
+
+PAL_RADASTAN
+COPPER_MOVE(PAL_VALUE_8BIT,TCB_PALC)
+PAL_LAYER3
 
 COPPER_WAIT(84,0) 
 _DX_2a:
@@ -272,7 +350,6 @@ _DX_0a:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+2-(14*7)) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL0)
-
 
 COPPER_WAIT(96+6,0) 
 _DX_1b:
@@ -461,7 +538,7 @@ ld(_DX_8b+1),a
 ret
 
 
-testme:
+scroller:
        // ad the speed to each offset (offset:pixel))
        ld de,speed
        ld ix,offset
@@ -559,21 +636,13 @@ A_COL8	macro
        \0 equ (\1&%11100000)+((\3>>6)&%11)+((\2>>3)&%11100)
 	endm
 
-A_COL8 _COL0,220,221,220
-A_COL8 _COL1,226,230,196
-A_COL8 _COL2,244,198,150
-A_COL8 _COL3,235,172,143
-A_COL8 _COL4,196,144,100
-A_COL8 _COL5,181,111,86
-A_COL8 _COL6,155,80,54
-A_COL8 _COL7,122,36,0
-A_COL8 _COL8,72,5,3
-    
+A_COL8 _COL0,238,238,238
+A_COL8 _COL1,238,238,204
+A_COL8 _COL2,238,204,170
+A_COL8 _COL3,238,170,136
+A_COL8 _COL4,204,136,102
+A_COL8 _COL5,170,102,68
+A_COL8 _COL6,136,68,34
+A_COL8 _COL7,102,34,0
+A_COL8 _COL8,68,0,0
 
-
-
-;COPPER_WAIT 0,6*32
-
-
-
-;endif
