@@ -33,8 +33,8 @@ video_setup:
 
       nextreg $1c,%00001000 ; Clip Window control : reset tilemap index
 
-       nextreg $1b,0; Clip Window Tilemap : x1 /2     
-       nextreg $1b,159              ; x2 /2
+       nextreg $1b,0+16; Clip Window Tilemap : x1 /2     
+       nextreg $1b,159-16              ; x2 /2
        nextreg $1b,(32)                          ; y1
        nextreg $1b,(192+64-32-1)               ; y2
 
@@ -105,13 +105,11 @@ GetMaxScanline:
 StartCopper:
        call scroller
        
-       ld a,0
-       out($fe),a
+       border 0
 
        call update
 
-       ld a,6
-       out($fe),a
+       border 6
 
 	ld      hl,copper_new_start
 	ld      bc,copper_new_end-copper_new_start
@@ -143,13 +141,9 @@ do_copper:
 	or	a
 	jp	p,@lp1		
 
-	ld a,7
-	out ($fe),a
+       border 7
 
 	nextreg $62,%01000000 ;// copper start | MSBs = 00
-
-	ld a,0
-	out ($fe),a
 
 	ret
  
@@ -196,10 +190,15 @@ copper_new_start:
 
 COPPER_WAIT(0,1) 
 
+layer_2_front equ *+1
+COPPER_MOVE(LAYER2_RAM_BANK,0);
+
 _DX_0:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+0) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL0)
+COPPER_MOVE(67,%00000001)
+
 
 _MAGIC
 PAL_RADASTAN
@@ -375,59 +374,260 @@ COPPER_MOVE(MAP_DX,0)
 COPPER_MOVE(MAP_DY,OFF_Y+(8-6)*4+PART2) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL4)
 
+;; test code for the dna scroller
+;; test code for the dna scroller
+;; test code for the dna scroller
+
+COPPER_WAIT(125,0)
+COPPER_MOVE( $18,0)
+COPPER_MOVE( $18,255)
+COPPER_MOVE( $18,0)
+COPPER_MOVE( $18,128+50-4)
+COPPER_MOVE(PAL_VALUE_8BIT,255)
+dna_x_offset: equ *+1
+COPPER_MOVE( $16,0)  
+dna_y_offset01: equ *+1
+COPPER_MOVE( $17,64)
+COPPER_MOVE(67,%10110101)
+
+layer_2_back equ *+1
+COPPER_MOVE(LAYER2_RAM_BANK,0);
+
 COPPER_WAIT(96+30,0) 
 _DX_5b:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+(8-6)*5+PART2) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL5)
+dna_y_offset02: equ *+1
+COPPER_MOVE( $17,64)
+
+COPPER_WAIT(96+30+1,0) 
+dna_y_offset03: equ *+1
+COPPER_MOVE( $17,64)
+
+COPPER_WAIT(96+30+2,0) 
+dna_y_offset04: equ *+1
+COPPER_MOVE( $17,64)
+
+COPPER_WAIT(96+30+3,0) 
+dna_y_offset05: equ *+1
+COPPER_MOVE( $17,64)
+
+COPPER_WAIT(96+30+4,0) 
+dna_y_offset06: equ *+1
+COPPER_MOVE( $17,64)
+
+COPPER_WAIT(96+30+5,0) 
+dna_y_offset07: equ *+1
+COPPER_MOVE( $17,64)
 
 COPPER_WAIT(96+36,0) 
 _DX_6b:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+(8-6)*6)+PART2 ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL6)
+dna_y_offset08: equ *+1
+COPPER_MOVE( $17,64)
+
+COPPER_WAIT(96+36+1,0) 
+dna_y_offset09: equ *+1
+COPPER_MOVE( $17,64)
+
+COPPER_WAIT(96+36+2,0) 
+dna_y_offset10: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+36+3,0) 
+dna_y_offset11: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+36+4,0) 
+dna_y_offset12: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+36+5,0) 
+dna_y_offset13: equ *+1
+COPPER_MOVE( $17,60)
 
 COPPER_WAIT(96+42,0) 
 _DX_7b:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+(8-6)*7+PART2) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL7)
+dna_y_offset14: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+42+1,0) 
+dna_y_offset15: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+42+2,0) 
+dna_y_offset16: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+42+3,0) 
+dna_y_offset17: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+42+4,0) 
+dna_y_offset18: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+42+5,0) 
+dna_y_offset19: equ *+1
+COPPER_MOVE( $17,60)
+
 
 COPPER_WAIT(96+48,0) 
 _DX_8b:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+(8-6)*8+PART2) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL8)
+dna_y_offset20: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+48+1,0) 
+dna_y_offset21: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+48+2,0) 
+dna_y_offset22: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+48+3,0) 
+dna_y_offset23: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+48++4,0) 
+dna_y_offset24: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+48+5,0) 
+dna_y_offset25: equ *+1
+COPPER_MOVE( $17,60)
+
 
 COPPER_WAIT(96+54,0) 
 _DX_7c:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+2-(14*0)+PART2) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL7)
+dna_y_offset26: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+54+1,0) 
+dna_y_offset27: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+54+2,0) 
+dna_y_offset28: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+54+3,0) 
+dna_y_offset29: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+54+4,0) 
+dna_y_offset30: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+54+5,0) 
+dna_y_offset31: equ *+1
+COPPER_MOVE( $17,60)
+
 
 COPPER_WAIT(96+60,0) 
 _DX_6c:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+2-(14*1)+PART2) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL6)
+dna_y_offset32: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+60+1,0) 
+dna_y_offset33: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+60+2,0) 
+dna_y_offset34: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+60+3,0) 
+dna_y_offset35: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+60+4,0) 
+dna_y_offset36: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+60+5,0) 
+dna_y_offset37: equ *+1
+COPPER_MOVE( $17,60)
 
 COPPER_WAIT(96+66,0) 
 _DX_5c:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+2-(14*2))+PART2 ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL5)
+dna_y_offset38: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+66+1,0) 
+dna_y_offset39: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+66+2,0) 
+dna_y_offset40: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+66+3,0) 
+dna_y_offset41: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+66+4,0) 
+dna_y_offset42: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+66+5,0) 
+dna_y_offset43: equ *+1
+COPPER_MOVE( $17,60)
+
 
 COPPER_WAIT(96+72,0) 
 _DX_4c:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+2-(14*3)+PART2) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL4)
+dna_y_offset44: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+72+1,0) 
+dna_y_offset45: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+72+2,0) 
+dna_y_offset46: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+72+3,0) 
+dna_y_offset47: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+72+4,0) 
+dna_y_offset48: equ *+1
+COPPER_MOVE( $17,60)
+
+COPPER_WAIT(96+72+5,0) 
+dna_y_offset49: equ *+1
+COPPER_MOVE( $17,60)
 
 COPPER_WAIT(96+78,0) 
 _DX_3c:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+2-(14*4)+PART2) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL3)
+dna_y_offset50: equ *+1
+COPPER_MOVE( $17,60)
 
 COPPER_WAIT(96+84,0) 
 _DX_2c:
@@ -446,7 +646,11 @@ _DX_0c:
 COPPER_MOVE(MAP_DX,0) 
 COPPER_MOVE(MAP_DY,OFF_Y+2-(14*7)+PART2) ;  8*col-6*i   
 COPPER_MOVE(PAL_VALUE_8BIT,_COL0)
+COPPER_MOVE(67,%10110001)
 
+COPPER_MOVE( $17,0)
+
+COPPER_HALT
 COPPER_HALT
 
 copper_new_end:
@@ -586,8 +790,7 @@ scroller:
        pop de
        add hl,TheText_start
 
-       ld a,l
-       out ($fe),a
+       border 1
 
        ld bc,40
        ldir
@@ -598,8 +801,7 @@ scroller:
        pop bc
        djnz .loop2
 
-       ld a,0
-       out ($fe),a
+       border 0
        
        ret
 

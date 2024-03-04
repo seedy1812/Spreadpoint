@@ -46,14 +46,12 @@ vbl:
 	push hl
 	push af
 
-	ld a,6
-	out ($fe),a
+	border 6
 
 	ld hl,irq_counter
 	inc (hl)
 
-	ld a,5
-	out ($fe),a
+	border 5
 
 	pop af
 	pop hl

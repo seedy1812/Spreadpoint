@@ -10,25 +10,18 @@ tcb_log_pal: incbin "logo_pagepdn.nxp"
 logo_x1 db 0
 logo_y1 db 0
 
-logo_x: db 0
-logo_y: db 0
-
-
 offsets: db $64,$3c,$14,$ac
-
-
-dy: db $82
 
 logo_dir: db 1
 logo_offset: db 16
 logo_frame: db 6
 
+
+// move y 0 ->32 -> 0
 logo_update:
     ld a,(logo_frame)
     inc a
     ld (logo_frame),a
-
-
 
     ld a,(logo_dir)
     or a
@@ -50,9 +43,19 @@ logo_update:
     ld  (logo_dir),a
 .done:
 
+
+; bits %011110000 is for frame
+; bottom 4 bits means it only updates the sprite every 16 vbbl's
+
     ld a,(logo_frame)
     swapnib
     and 7
+
+; the layout of dprites is
+; 0 1
+; 2 3
+; 4 5
+; 6 7
 
     ld d,a
     ld e,0
@@ -62,9 +65,6 @@ logo_update:
     ld a,(logo_x1)
     add a,e
     nextreg $16,a
-
-  ; ld a,0
-  ;  ld (logo_offset),a
 
     ld a,(logo_offset)
     ld e,a
@@ -76,9 +76,11 @@ logo_update:
     neg
     sub e
 
-
     nextreg $17,a
 
+
+
+if 1
     ld a,(logo_x1)
     nextreg $18,a
     add 128-1
@@ -91,12 +93,19 @@ logo_update:
    nextreg $18,a
     add 40-1
    nextreg $18,a
+else
+  nextreg $18,0
+  nextreg $18,255
+  nextreg $18,0
+  nextreg $18,255
 
+endif
     ret
  
 
 
 logo_setup:
+
     ld a, 64
     ld (logo_x1),a
 
@@ -110,6 +119,7 @@ logo_setup:
     
     call logo_update
 
+; transparent colour
 ;    nextreg $14,$ff  ;  wrong
 
     nextreg $43,%00010001   ; set paleet layer 2 pal 0
@@ -124,14 +134,11 @@ logo_setup:
     nextreg $41,a           ; 0 is transparent
     djnz    .lp
 
-    ld a,0
-
-    or %0011      ; shadow layer2 , is visible and layer 2 write paging
-
-    ld bc, $123b   
-	out (c), a
-
     ret
 
+
+logo_ang_start:
+   include "logo_ang.s"
+logo_ang_end:
 
 

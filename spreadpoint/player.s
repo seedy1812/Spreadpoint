@@ -1,20 +1,35 @@
 
+border: macro
+            ld a,\0
+            out ($fe),a
+            endm
+
+
 MY_BREAK	macro
         db $dd,01
 		endm
 
-	DMA_PORT    equ $6b ;//: zxnDMA
+	LAYER2_RAM_BANK		equ $12
+	LAYER2_SHADOW_BANK	equ $13
+	DISP_CTRL_1			equ $69
+	MMU_7				equ	$57
+	DMA_PORT    		equ $6b ;//: zxnDMA
 
 	TILE_GRAPHICS       equ $6000
 	TILE_MAP            equ $5000
 
-	DIGIT_0		equ 100
+	DIGIT_0				equ 100
 
 	OPT Z80
 	OPT ZXNEXTREG    
 
     seg     CODE_SEG, 4:$0000,$8000
     seg     TCB_1_SEG, 18:$0000,$0000 
+    seg     DNA_SCROLLER_SEG,30:$0000,$0000 
+
+
+	seg		DNA_FONT_SEG, 60:$0000,$0000
+
     
 
     seg     CODE_SEG
@@ -44,6 +59,7 @@ start:
 	call video_setup
 	call init_vbl
 
+	call dna_init
 
 	ld de,TILE_GRAPHICS
 	ld hl,TheTiles_start+4				// skip top line
@@ -83,21 +99,24 @@ start:
 	nextreg $6c, %00000000
 
 
+
 frame_loop:
 	call wait_vbl
+	call dna_test
+	call dna_copper
 	call StartCopper
 	call logo_update
-	ld a, 1
-	out ($fe),a
+	
+	border 1
 
 	call draw_balls
-	ld a, 2
-	out ($fe),a
+
+	border 2
 
 	call calc_balls
 
-	ld a, 0
-	out ($fe),a
+	border 3
+
 	jp frame_loop
 
 mem_init_page:  db 16
@@ -106,10 +125,11 @@ include "loading.s"
 include "video.s"
 include "bobs.s"
 include "logo.s"
-
+include "dna.s"
 
     seg     CODE_SEG
 
+THE_END:
 
  	savenex "player.nex",start
 
