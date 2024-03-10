@@ -9,7 +9,11 @@ dna_font_ptr: dw 0              ; current letter address
 dna_y_offset: db 0
 dna_rotate: db 0                ; offset to add to table to simulate rotate
 
-zerobuffer: ds 64
+zerobuffer:     ;; 64 0's
+            db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+            db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+            db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+            db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 
 letter_lookup:                  ; ascii to font table
         ds 32
@@ -97,7 +101,7 @@ Layer2cls:
 cls:
     ld hl,0
     ld de,1
-    ld bc,16*1024-1
+    ld bc,+(16*1024)-1
     ld (hl),a
     ldir
     ret
@@ -276,6 +280,6 @@ endif
 
 
         seg		DNA_FONT_SEG
-dna_font: incbin "_sa.nxi"        
+dna_font: incbin "sa.nxi"        
 
 

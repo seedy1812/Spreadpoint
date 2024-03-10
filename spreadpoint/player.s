@@ -1,6 +1,6 @@
 
 border: macro
-            ld a,\0
+           ld a,\0
             out ($fe),a
             endm
 
@@ -45,13 +45,6 @@ StackStart:
 start:
 ;; set the stack pointer
 	ld sp , StackStart
-
-; first page to load stuff
-	ld a,(mem_init_page)
-
-; load top layer map
-	ld (load_page),a
-
 
 	call logo_setup
 
@@ -119,13 +112,10 @@ frame_loop:
 
 	jp frame_loop
 
-mem_init_page:  db 16
-
-include "loading.s"
-include "video.s"
-include "bobs.s"
-include "logo.s"
 include "dna.s"
+include "video.s"
+include "logo.s"
+include "bobs.s"
 
     seg     CODE_SEG
 

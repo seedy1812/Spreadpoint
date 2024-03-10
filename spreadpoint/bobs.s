@@ -1,3 +1,15 @@
+
+        seg     CODE_SEG
+
+NUM_BOBS equ 20
+
+
+outer_8 equ 18
+outer_5 equ 14
+
+inner_8 equ 14
+inner_5 equ 10
+
 // not signed
 mul_hl_de:       ; (uint16)HL = (uint16)HL x (uint16)DE
     ld      c,e
@@ -61,7 +73,7 @@ draw_balls:
        out (c),a ; start at pattern 0
 
        ld ix , posn
-       ld b,20
+       ld b,NUM_BOBS
 .loop:
        push bc
        ld d,(ix+0)          ;; de = x
@@ -88,8 +100,6 @@ draw_balls:
        or $80        ;4 bit pattern
        out (c),a
 
-
-
        pop bc
        ld de,4
        add ix,de
@@ -104,21 +114,20 @@ calc_balls:
     ld a,0
 
     ld hl,(iteration5)
-    add hl,5
+    add hl,outer_5
     ld (iteration5),hl
+    ld (iteration5_current),hl
 
     ld hl,(iteration8)
-    add hl,8
+    add hl,outer_8
     ld (iteration8),hl
+    ld (iteration8_current),hl
 
-
+    ld b,NUM_BOBS
 .loop
-    push af
-    ld hl ,(iteration5)
-    add  hl,a
-   
+    push bc
+    ld hl ,(iteration5_current)
     call get_sin_hl_to_de
-
 
     ld hl,128-8
     call mul_hl_de
@@ -134,12 +143,7 @@ calc_balls:
     ld (ix+0),h
     ld (ix+1),l
 
-    pop af
-
-    push af
-
-    ld hl,(iteration8)
-    add  hl,a
+    ld hl,(iteration8_current)
     call get_sin_hl_to_de
 
     ld hl,50
@@ -155,21 +159,29 @@ calc_balls:
 
     ld (ix+2),h
     ld (ix+3),l
- 
-    pop af
+
+    ld hl ,(iteration5_current)
+    add hl,Inner_5
+    ld (iteration5_current),hl
+
+    ld hl ,(iteration8_current)
+    add hl,Inner_8
+    ld (iteration8_current),hl
 
     ld de,4
     add ix,de
 
-    add 18
-    cp 20*18
-    jr nz,.loop
- 
+    pop bc
+    djnz .loop
+
     border 0
 
     ret
 
 
+
+get_cos_hl_to_de
+    add hl,512/4
 get_sin_hl_to_de
     ld a,h
     and 1   ; sine table of 512 entries 0 -> 1ff
@@ -179,16 +191,17 @@ get_sin_hl_to_de
     ld e,(hl)
     inc hl
     ld d,(hl)
-
     ret
 
-iteration5:: dw 0
+iteration5_current: dw 0
+iteration8_current: dw 0
+iteration5: dw 10
 iteration8: dw 0
-posn :  ds 20*2*2     ;; 16 bit * 20 bobs *2(x,y)
 
-xxx: dw (sine_length/2) -1
+posn :  ds NUM_BOBS*2*2     ;; 16 bit * 20 bobs *2(x,y)
 
 sine_table:
         include "sine.s"
-        include "sine.s"
-sine_length equ *-sine_table
+sine_table_end:
+
+    align 4
