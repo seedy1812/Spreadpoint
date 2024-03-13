@@ -1,4 +1,9 @@
 	code_seg
+
+irq_counter: db 0
+irq_last_count: db 0
+
+
    align 32
 
 IM_2_Table:
@@ -39,47 +44,44 @@ init_vbl:
 
     im 2
 
+    ei
+    ret
+
 vbl:
 	di
-	push hl
 	push af
 
 	border 6
 
+	push hl
 	ld hl,irq_counter
 	inc (hl)
+	pop hl
 
 	border 5
 
 	pop af
-	pop hl
 
     NextReg $c8,1
     ei
     reti
 
 linehandler:
-	my_break;
+	my_break
     NextReg $c8,2
     ei
     reti
 
 ctc0handler:
-	my_break;
+	my_break
     NextReg $c9,1
     ei
     reti
 
 inthandler:
-	my_break;
+	my_break
     ei
     reti
-
-
-irq_counter: db 0
-irq_last_count: db 0
-
-
 
 wait_vbl:
 	halt
@@ -88,5 +90,4 @@ wait_vbl:
 	ld a,0
 	ld (irq_counter),a
 	ret
-
 

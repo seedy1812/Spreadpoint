@@ -8,6 +8,7 @@ dna_scroll_pos: dw dna_font_ptr ; letter in scroller
 dna_font_ptr: dw 0              ; current letter address
 dna_y_offset: db 0
 dna_rotate: db 0                ; offset to add to table to simulate rotate
+dna_mmu_font_page: db 0         ; mmu7 page for letter
 
 zerobuffer:     ;; 64 0's
             db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -80,14 +81,149 @@ endif
     nextreg $40,0           ; palette index
     ld hl,dma_palette
 
-    ld b,16
+
+
+    ld b,4
 .lp:
     ld a,(hl)
-    inc hl
     nextreg $41,a           ; 0 is transparent
+
+    inc hl
     djnz    .lp
 
+
+    ld c,3
+    call darken_pal
+    ld ix,DNA_PAL_0
+    call set_copper_pal
+    ld ix,DNA_PAL_10
+    call set_copper_pal
+
+    ld c,4
+    call darken_pal
+    ld ix,DNA_PAL_1
+    call set_copper_pal
+    ld ix,DNA_PAL_9
+    call set_copper_pal
+
+
+    ld c,5
+    call darken_pal
+    ld ix,DNA_PAL_2
+    call set_copper_pal
+    ld ix,DNA_PAL_8
+    call set_copper_pal
+
+    ld c,6
+    call darken_pal
+    ld ix,DNA_PAL_3
+    call set_copper_pal
+    ld ix,DNA_PAL_7
+    call set_copper_pal
+
+    ld c,7
+    call darken_pal
+    ld ix,DNA_PAL_4
+    call set_copper_pal
+    ld ix,DNA_PAL_6
+    call set_copper_pal
+
+    ld c,8
+    call darken_pal
+    ld ix,DNA_PAL_5
+    call set_copper_pal
+
     ret
+
+dark_pal: ds 4
+
+darken_pal:
+    ld hl,dma_palette
+    ld de,dark_pal
+    ld b ,4
+
+;    ld c,8
+.loop:
+    push bc
+    push de
+    ld a,%11100000  ; rrr00000
+    and (hl)
+
+
+    ld d,0
+    ld e,a
+
+    ld b,3
+    BSRL de,b       ; divide by 8
+
+    ld d,c          ; mul by c
+    mul
+    ld a,%11100000
+    and e
+    ld ixl,a
+
+    ld a,%00011100  ; 000ggg00
+    and (hl)
+
+
+    ld d,0
+    ld e,a
+
+    ld d,c          ; mul by c
+    mul
+
+    ld b,3
+    BSRL de,b       ; divide by 8
+    ld a,%00011100
+    and e
+    ld ixh,a
+    
+
+    ld a,%00000011  ; 000000bb
+    and (hl)
+
+    add a,a         ; 00000bb0
+
+    ld d,0
+    ld e,a
+
+    ld d,c          ; mul by c
+    mul
+
+    ld b,4
+    BSRL de,b       ; divide by 8
+
+    ld a,%00000011
+    and e
+
+    or ixl
+    or ixh
+    
+
+    pop de
+    ld (de),a
+    inc de
+    inc hl
+    pop bc
+    djnz .loop
+    ret
+
+
+
+set_copper_pal
+    ld hl,dark_pal+1
+
+    ld a,(hl)
+    inc hl
+    ld b,(hl)
+    inc hl
+    ld c,(hl)
+    inc hl
+    ld (ix+0*2+5),a
+    ld (ix+1*2+5),b
+    ld (ix+2*2+5),c
+    ret
+
 
 Layer2cls:
     ld a,%10001111      ; first 16
@@ -109,17 +245,17 @@ cls:
 dna_copper:
     ld ix,dna_writes        ; pointer to address to se the scrollery in coppet
     ld c,0                  ; y in the scroller 0 ->N
-    ld a,(dna_rotate)       ; step round the scroller Y
+    ld a,(.dna_rotate+1)       ; step round the scroller Y
     inc a
     and 63
-    ld (dna_rotate),a
-    ld iyl,a                ; store this here
-    
+    ld (.dna_rotate+1),a
+   
     ld b, dna_pos_end - dna_pos ; for all the lines in the scroller
     ld de,dna_pos               ; these are the default Y values
 .loop:
     ld a,(de)                   ; read the Y line to draw - default
-    add a,iyl                   ; add on the rotation
+.dna_rotate:
+    add a,0                   ; add on the rotation
     and 63                      ; only 64 lines in image  0->63 
     sub c                       ; find delta offset to shift Layer 2 by
 
@@ -142,6 +278,10 @@ dna_copper:
 
 
 dna_test:
+    ld a,MMU_7
+    call ReadNextReg
+    push af
+
     ld a,(dna_pixels_left)
     or a
     jr nz,.same_letter
@@ -187,17 +327,19 @@ endif
 
     pop af
 
-
+ 
     ;; point to the memory bank - 8 letters per bank
     srl a
     srl a
     srl a
     add a,bank(dna_font)
+    ld (dna_mmu_font_page),a
 
-    NextReg MMU_7,a
 
 
 .same_letter:
+    ld a,(dna_mmu_font_page)
+    NextReg MMU_7,a
 
 ;    ld d,0
     ld a,(dna_line)
@@ -276,6 +418,12 @@ endif
     ld (dna_line),a
 
     ld ( dna_x_offset),a
+
+    pop af
+    nextreg MMU_7,a
+
+
+
     ret
 
 

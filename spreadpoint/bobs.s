@@ -188,6 +188,10 @@ get_sin_hl_to_de
     ld h,a
     add hl,hl
     add hl,sine_table
+
+    ld a,bank(sine_table)
+    nextreg MMU_7,a
+
     ld e,(hl)
     inc hl
     ld d,(hl)
@@ -200,8 +204,8 @@ iteration8: dw 0
 
 posn :  ds NUM_BOBS*2*2     ;; 16 bit * 20 bobs *2(x,y)
 
+        seg SINE_SEG
 sine_table:
         include "sine.s"
 sine_table_end:
-
-    align 4
+        seg CODE_SEG

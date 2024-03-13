@@ -3,14 +3,15 @@
 
 tcb_logos:	incbin "logo_pagepdn.nxi"
 
-    seg     CODE_SEG
-
-tcb_log_pal: incbin "logo_pagepdn.nxp"
-
+        seg SINE_SEG
 tcb_sine:   
             include "tcb_sine.s"
 tcb_sine_end:
 
+
+    seg     CODE_SEG
+
+tcb_log_pal: incbin "logo_pagepdn.nxp"
 
 logo_ang_current:   dw 0
 logo_ang_pos:       dw tcb_sine
@@ -33,6 +34,10 @@ logo_sheet_xy:  db 0,0,64,20
                 db 128,120,64,20
 
 logo_update:
+
+    ld a,bank(tcb_sine)
+    nextreg MMU_7,a
+
     ld hl,(logo_ang_pos)
 
     ld e,(hl)
@@ -79,22 +84,21 @@ logo_update:
 
     add de,256    ; now to 0 to 2
 
-    ld hl,2         ; 0 to 4
+    ld hl,1         ; 0 to 4
     call mul_hl_de
 
-    ld a, 4
+    ld a, 8
     sub h
-    cp 4
+    cp 8
     jr nz,.valid
     dec a
 .valid:
-    ld (logo_frame),a
+;    ld (logo_frame),a
 
     nextreg 14,$ff
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;  my_break
     ld a,(logo_frame)
 
     ld ix ,logo_sheet_xy

@@ -24,23 +24,16 @@ MY_BREAK	macro
 	OPT ZXNEXTREG    
 
     seg     CODE_SEG, 4:$0000,$8000
-    seg     TCB_1_SEG, 18:$0000,$0000 
+
+	seg     TCB_1_SEG, 18:$0000,$0000 
     seg     DNA_SCROLLER_SEG,30:$0000,$0000 
 
-
+	seg		SINE_SEG,	 59:$0000,$e000
 	seg		DNA_FONT_SEG, 60:$0000,$0000
 
     
 
     seg     CODE_SEG
-
-	include "irq.s"
-
-	org $8200                    ; Start of application
-StackEnd:
-	ds	128
-StackStart:
-	ds  2
 
 start:
 ;; set the stack pointer
@@ -112,8 +105,15 @@ frame_loop:
 
 	jp frame_loop
 
-include "dna.s"
+StackEnd:
+	ds	128
+StackStart:
+	ds  2
+
+
+include "irq.s"
 include "video.s"
+include "dna.s"
 include "logo.s"
 include "bobs.s"
 
